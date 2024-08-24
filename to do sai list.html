@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Task Manager</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: #000000;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color:  #FFFF00;
+            margin-bottom: 20px;
+        }
+
+        .task-form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .task-form input[type="text"],
+        .task-form input[type="date"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            margin-right: 5px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        .task-form input[type="text"]:focus,
+        .task-form input[type="date"]:focus {
+            border-color:  #FFFF00;
+        }
+
+        .task-form button {
+            padding: 10px 15px;
+            font-size: 14px;
+            background-color: #FFFF00;
+            color: #000000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .task-form button:hover {
+            background-color:  #FFFF00;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filters button {
+            padding: 8px 12px;
+            background-color: #FFFF00;
+            color: #000000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .filters button:hover {
+            background-color:  #FFFF00;
+        }
+
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #eeeeee;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .task-item:hover {
+            background-color: #e0e0e0;
+        }
+
+        .task-item .task-name {
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .task-item .task-date {
+            font-size: 12px;
+            color: #757575;
+            margin-left: 10px;
+        }
+
+        .task-item .actions button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-left: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .task-item .actions button.complete-btn {
+            background-color: #4caf50;
+        }
+
+        .task-item .actions button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enhanced Task Manager</h1>
+        <div class="task-form">
+            <input type="text" id="task-input" placeholder="Enter a task...">
+            <input type="date" id="due-date">
+            <button id="add-task-btn">Add Task</button>
+        </div>
+        <div class="filters">
+            <button id="all-btn">All</button>
+            <button id="completed-btn">Completed</button>
+            <button id="pending-btn">Pending</button>
+        </div>
+        <ul id="task-list" class="task-list">
+            <!-- Tasks will be dynamically added here -->
+        </ul>
+    </div>
+
+    <script>
+        let tasks = [];
+
+        const taskInput = document.getElementById('task-input');
+        const dueDateInput = document.getElementById('due-date');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskList = document.getElementById('task-list');
+
+        const allBtn = document.getElementById('all-btn');
+        const completedBtn = document.getElementById('completed-btn');
+        const pendingBtn = document.getElementById('pending-btn');
+
+        addTaskBtn.addEventListener('click', addTask);
+        allBtn.addEventListener('click', () => filterTasks('all'));
+        completedBtn.addEventListener('click', () => filterTasks('completed'));
+        pendingBtn.addEventListener('click', () => filterTasks('pending'));
+
+        function addTask() {
+            const taskName = taskInput.value.trim();
+            const dueDate = dueDateInput.value;
+
+            if (taskName === '') {
+                alert('Please enter a task!');
+                return;
+            }
+
+            const newTask = {
+                id: Date.now(),
+                name: taskName,
+                dueDate: dueDate || 'No due date',
+                completed: false
+            };
+
+            tasks.push(newTask);
+            renderTasks(tasks);
+            taskInput.value = '';
+            dueDateInput.value = '';
+        }
+
+        function renderTasks(taskArray) {
+            taskList.innerHTML = '';
+
+            taskArray.forEach(task => {
+                const taskItem = document.createElement('li');
+                taskItem.className = 'task-item';
+
+                const taskName = document.createElement('span');
+                taskName.className = 'task-name';
+                taskName.textContent = task.name;
+
+                const taskDate = document.createElement('span');
+                taskDate.className = 'task-date';
+                taskDate.textContent = task.dueDate ? `Due: ${task.dueDate}` : '';
+
+                const completeBtn = document.createElement('button');
+                completeBtn.className = 'complete-btn';
+                completeBtn.textContent = task.completed ? 'Undo' : 'Complete';
+                completeBtn.addEventListener('click', () => toggleComplete(task.id));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => deleteTask(task.id));
+
+                const taskDiv = document.createElement('div');
+                taskDiv.appendChild(taskName);
+                taskDiv.appendChild(taskDate);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'actions';
+                actionsDiv.appendChild(completeBtn);
+                actionsDiv.appendChild(deleteBtn);
+
+                taskItem.appendChild(taskDiv);
+                taskItem.appendChild(actionsDiv);
+
+                taskList.appendChild(taskItem);
+            });
+        }
+
+        function deleteTask(taskId) {
+            tasks = tasks.filter(task => task.id !== taskId);
+            renderTasks(tasks);
+        }
+
+        function toggleComplete(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+                renderTasks(tasks);
+            }
+        }
+
+        function filterTasks(status) {
+            let filteredTasks = [];
+
+            switch (status) {
+                case 'completed':
+                    filteredTasks = tasks.filter(task => task.completed);
+                    break;
+                case 'pending':
+                    filteredTasks = tasks.filter(task => !task.completed);
+                    break;
+                default:
+                    filteredTasks = tasks;
+            }
+
+            renderTasks(filteredTasks);
+        }
+
+        renderTasks(tasks);
+    </script>
+</body>
+</html>
